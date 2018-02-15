@@ -37,6 +37,24 @@
             </div>
         </div>
         <h1 class="text-center">Total price: {{ totalPrice }} $</h1>
+        <br />
+        <div class="row">
+            <div class="col-sm-4 col-sm-push-4 form-horizontal well">
+                <div class="row">
+                    <div class="col-sm-6 col-sm-push-3">
+                        <div class="form-group">
+                            <input type="text" class="form-control" v-model="productToAdd.Name" placeholder="Name" />
+                        </div>
+                        <div class="form-group">
+                            <input type="text" class="form-control" v-model="productToAdd.Price" placeholder="Price" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <button type="button" v-on:click="saveProduct()" class="btn btn-success col-sm-8 col-sm-push-2">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
 
@@ -47,8 +65,13 @@
         var app = new Vue({
             el: '#app',
             data: {
-                products: JSON.parse('@Html.Raw(JsonConvert.SerializeObject(Model))'),
-                basket: JSON.parse('@Html.Raw(JsonConvert.SerializeObject(Basket))')
+                products: JSON.parse(`@Html.Raw(JsonConvert.SerializeObject(Model))`),
+                basket: JSON.parse(`@Html.Raw(JsonConvert.SerializeObject(Basket))`),
+                productToAdd: {
+                    Id: 0,
+                    Name: "",
+                    Price: 0.00
+                }
             },
             methods: {
                 getId: function (product) {
@@ -59,6 +82,38 @@
                 },
                 addToBasket: function (index) {
                     this.basket[index].Items++;
+                },
+                saveProduct: function () {
+
+                    var self = this;
+
+                    $.ajax({
+                        url: '/Home/AddProduct',
+                        method: 'POST',
+                        contentType: 'application/json',
+                        dataType: 'json',
+                        data: JSON.stringify(this.productToAdd),
+                        success: function (res) {
+
+                            self.products.push({
+                                Id: res,
+                                Name: self.productToAdd.Name,
+                                Price: self.productToAdd.Price
+                            });
+
+                            self.basket.push({
+                                Id: res,
+                                Price: self.productToAdd.Price,
+                                Items: 0
+                            });
+
+                            self.productToAdd.Name = "";
+                            self.productToAdd.Price = "";
+                        },
+                        error: function (res) {
+                            alert(JSON.stringify(res));
+                        }
+                    });
                 }
             },
             computed: {
@@ -67,6 +122,8 @@
                         return total + entry.Items * entry.Price;
                     }, 0.00).toFixed(2);
                 }
+            },
+            watch: {
             }
         });
     </script>

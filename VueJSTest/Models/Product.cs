@@ -7,15 +7,7 @@ namespace VueJSTest.Models
 {
     public class Product
     {
-        public int Id { get; set; }
-
-        public string Name { get; set; }
-
-        public decimal Price { get; set; }
-
-        public static IEnumerable<Product> GetProducts()
-        {
-            return new List<Product>()
+        private static List<Product> products = new List<Product>()
             {
                 new Product()
                 {
@@ -36,6 +28,21 @@ namespace VueJSTest.Models
                      Price = 1215.00M
                 }
             };
+
+        public int Id { get; set; }
+
+        public string Name { get; set; }
+
+        public decimal Price { get; set; }
+
+        public static IEnumerable<Product> GetProducts()
+        {
+            return products;
+        }
+
+        public static void AddProduct(Product prod)
+        {
+            products.Add(prod);
         }
     }
 }
