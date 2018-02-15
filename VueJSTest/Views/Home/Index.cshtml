@@ -1,0 +1,74 @@
+﻿@model IEnumerable<VueJSTest.Models.Product>
+@using Newtonsoft.Json;
+
+@{
+    Layout = null;
+
+    var Basket = Model.Select(x => new { Id = x.Id, Price = x.Price, Items = 0 });
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/Content/Site.css" rel="stylesheet" />
+</head>
+<body>
+    <div id="app">
+        <div class="row">
+            <div v-for="(product, index) in products" class="col-sm-4 well" v-bind:id="getId(product)">
+                <h2 class="text-center">{{product.Name}}</h2>
+                <p class="text-center">Price: {{product.Price}} $</p>
+
+                <div class="row">
+                    <div class="col-sm-4">
+                        <button v-on:click="addToBasket(index)" class="btn btn-success pull-right"><span class="glyphicon glyphicon-plus"></span></button>
+                    </div>
+                    <div class="col-sm-4">
+                        <input type="text" v-model="basket[index].Items" class="form-control" disabled="disabled" />
+                    </div>
+                    <div class="col-sm-4">
+                        <button v-on:click="removeFromBasket(index)" class="btn btn-success pull-left"><span class="glyphicon glyphicon-minus"></span></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <h1 class="text-center">Total price: {{ totalPrice }} $</h1>
+    </div>
+
+
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.0/vue.js"></script>
+    <script type="text/javascript">
+        var app = new Vue({
+            el: '#app',
+            data: {
+                products: JSON.parse('@Html.Raw(JsonConvert.SerializeObject(Model))'),
+                basket: JSON.parse('@Html.Raw(JsonConvert.SerializeObject(Basket))')
+            },
+            methods: {
+                getId: function (product) {
+                    return 'product_' + product.Id;
+                },
+                removeFromBasket: function (index) {
+                    this.basket[index].Items = Math.max(0, this.basket[index].Items - 1);
+                },
+                addToBasket: function (index) {
+                    this.basket[index].Items++;
+                }
+            },
+            computed: {
+                totalPrice: function () {
+                    return this.basket.reduce(function (total, entry) {
+                        return total + entry.Items * entry.Price;
+                    }, 0.00).toFixed(2);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
